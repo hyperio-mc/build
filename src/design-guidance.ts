@@ -12,20 +12,23 @@ export const anthropicFrontendDesignSkill = `Frontend design skill:
 - Use accessible, working code and preserve app functionality.`
 
 export const scoutBrandStyles = `Scout Studio observed brand styles from https://studio.scoutos.com:
-- Overall register: restrained product UI, crisp, quiet, high-trust, monochrome-first.
-- Font: GeistSans with GeistSans Fallback; use system sans fallback only after Geist.
-- Base background: white / oklch(1 0 0); primary text around oklch(0.3211 0 0) or rgb(33 33 38).
-- Secondary text: dark text at roughly 65% opacity.
-- Primary controls: near-charcoal rgb(47 48 55) backgrounds with white text.
-- Inputs/buttons: compact 13px text, 6px border radius, 6px 12px padding, subtle 1px ring shadows instead of heavy borders.
-- Shadows: minimal layered rings and tiny elevation, e.g. 0 0 0 1px low-alpha black plus small 1-3px y shadow.
-- App shell: pale gray left sidebar around 314px wide with a fine divider, white main canvas, sparse navigation, muted gray labels, and blue active/action accents.
-- Home screen composition: large centered greeting block with dark heading and oversized muted-gray subheading, followed by a wide rounded prompt composer.
-- Composer styling: 1px rainbow/blue-pink focus ring or gradient border, large radius around 16px, ample internal whitespace, subdued placeholder text, small icon row, and a quiet send button.
-- Chat list: compact rows with 28-32px circular avatars, soft gradient placeholders, 15-16px gray labels, clipped long titles.
-- Tool/banner surfaces: very light gray rounded rectangles, small integration icons, low-contrast utility copy.
-- Layout: compact controls with generous surrounding whitespace; the interface feels airy without being decorative.
-- Avoid decorative gradients except subtle avatar fills and fine focus rings; prefer precise spacing, crisp controls, and quiet contrast.`
+- Overall register: industrial-refined workshop aesthetic — precise, intentional, crafted.
+- Font: GeistSans for UI chrome; Instrument Serif (italic) for headings and the Build wordmark. Use system sans fallback only after Geist.
+- Base background: warm off-white #f5f5f3 (var --surface); raised surfaces pure white.
+- Primary text: near-black #1a1a1f (var --ink); secondary text at ~65% opacity.
+- Signature gradient: linear-gradient(110deg, #ff8acb, #73e3d4, #4f7dff) — used on the Build wordmark, textarea border, progress bar, selected-element panel border, and accent indicators.
+- Primary controls: charcoal #2f3037 backgrounds with white text.
+- Buttons: translateY(-1px) lift on hover with shadow intensification; spring easing for interactive feel.
+- Message animations: slide-in from below with stagger (animation: msgSlideIn).
+- Thinking indicator: left gradient accent bar (3px) + sweeping highlight animation.
+- Selected element panel: gradient border using ::before pseudo-element at 40% opacity for a luminous card effect.
+- Progress bar: gradient fill with shimmer overlay animation.
+- Modal: slide-in from below with scale(0.97) spring ease.
+- Noise texture: subtle SVG fractalNoise overlay at 1.8% opacity on the app shell for depth.
+- Shadows: layered ring shadows (0 0 0 1px + y-shadow) for elevation; large 100px shadows for modals.
+- App shell: 284px sidebar (down from 314px) for more preview breathing room.
+- Chat messages: clamped to 8 lines (up from 5) before expansion.
+- Avoid decorative gradients except the signature gradient and its soft variant; prefer precise spacing, crisp controls, and quiet contrast.`
 
 export function designGuidancePrompt() {
   return `${anthropicFrontendDesignSkill}\n\n${anthropicBrandGuidelines}\n\n${scoutBrandStyles}`
