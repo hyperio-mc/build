@@ -31,6 +31,7 @@ function normalizeSelectedElement(option) {
 }
 
 export async function callAgent(requestId, provider, model, userPrompt, apiKey = '', ollamaUrl = '', scoutosApiKey = '', scoutosBaseUrl = '', files, messages, selectedElement, elementComment = '', _webcontainerApi = '') {
+  console.log('[Build Agent] callAgent called with provider:', provider)
   const { runAgent } = await agentModule()
   const controller = new AbortController()
   activeController = controller
@@ -39,33 +40,42 @@ export async function callAgent(requestId, provider, model, userPrompt, apiKey =
   try {
     let wcApi = undefined
     if (provider === 'scoutos') {
-      const wc = await import('../webcontainer')
-      wcApi = {
-        writeProjectFile: wc.writeProjectFile,
-        readProjectFile: wc.readProjectFile,
-        runCommand: async (command, _timeout) => {
-          const instance = await wc.bootWebContainer()
-          const proc = await instance.spawn('jsh', ['-c', command])
-          let output = ''
-          proc.output.pipeTo(new WritableStream({ write: chunk => { output += String(chunk) } }))
-          const exitCode = await proc.exit
-          return { exitCode, output }
-        },
-        listFiles: async (path = '.') => {
-          const instance = await wc.bootWebContainer()
-          const entries = await instance.fs.readdir(path, { withFileTypes: true })
-          return entries.map(e => e.name)
-        },
-        installPackage: async (pkg) => {
-          const instance = await wc.bootWebContainer()
-          const proc = await instance.spawn('npm', ['install', pkg])
-          let output = ''
-          proc.output.pipeTo(new WritableStream({ write: chunk => { output += String(chunk) } }))
-          const exitCode = await proc.exit
-          return { exitCode, output }
-        },
+      console.log('[Build Agent] Constructing WebContainer API for ScoutOS...')
+      try {
+        const wc = await import('../webcontainer')
+        console.log('[Build Agent] WebContainer module loaded:', typeof wc)
+        wcApi = {
+          writeProjectFile: wc.writeProjectFile,
+          readProjectFile: wc.readProjectFile,
+          runCommand: async (command, _timeout) => {
+            const instance = await wc.bootWebContainer()
+            const proc = await instance.spawn('jsh', ['-c', command])
+            let output = ''
+            proc.output.pipeTo(new WritableStream({ write: chunk => { output += String(chunk) } }))
+            const exitCode = await proc.exit
+            return { exitCode, output }
+          },
+          listFiles: async (path = '.') => {
+            const instance = await wc.bootWebContainer()
+            const entries = await instance.fs.readdir(path, { withFileTypes: true })
+            return entries.map(e => e.name)
+          },
+          installPackage: async (pkg) => {
+            const instance = await wc.bootWebContainer()
+            const proc = await instance.spawn('npm', ['install', pkg])
+            let output = ''
+            proc.output.pipeTo(new WritableStream({ write: chunk => { output += String(chunk) } }))
+            const exitCode = await proc.exit
+            return { exitCode, output }
+          },
+        }
+        console.log('[Build Agent] wcApi constructed:', Object.keys(wcApi))
+      } catch (wcError) {
+        console.error('[Build Agent] Failed to construct WebContainer API:', wcError)
+        throw new Error('Failed to initialize WebContainer for ScoutOS: ' + wcError.message)
       }
     }
+    console.log('[Build Agent] Calling runAgent with webcontainerApi:', wcApi ? 'present' : 'undefined')
     const result = await runAgent({ provider, apiKey, ollamaUrl, scoutosApiKey, scoutosBaseUrl, model, userPrompt, files: normalizeFiles(files), messages: normalizeMessages(messages), selectedElement: normalizeSelectedElement(selectedElement), elementComment, signal: controller.signal, webcontainerApi: wcApi })
     dispatchAgentSucceeded(requestId, result.reply, result.patches)
   } catch (error) {
